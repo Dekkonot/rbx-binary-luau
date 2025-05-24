@@ -4,7 +4,7 @@ local dom = require("./dom")
 local compress = require("./compress")
 local constants = require("./constants")
 local reader = require("./reader")
-local RobloxType = require("./RobloxType")
+local RobloxType = require("./roblox-type")
 
 local MAGIC_NUMBER = constants.MAGIC_NUMBER
 local MAGIC_NUMBER_LEN = #MAGIC_NUMBER
@@ -128,36 +128,101 @@ local function parse_PROP(
 		for i, referent in referent_list do
 			cursor, read_value = reader.string(blob, cursor)
 			local inst = referent_to_instance[referent]
-			inst.Properties[prop_name] = RobloxType.variant("String", read_value)
+			inst.Properties[prop_name] = RobloxType.string(read_value)
 		end
 	elseif type_id == 0x02 then
 		for i, referent in referent_list do
 			local read_value = buffer.readu8(blob, cursor)
 			cursor += 1
 			local inst = referent_to_instance[referent]
-			inst.Properties[prop_name] = RobloxType.variant("Bool", read_value ~= 0x00)
+			inst.Properties[prop_name] = RobloxType.bool(read_value ~= 0x00)
 		end
 	elseif type_id == 0x03 then
 		local values: { number }
 		cursor, values = reader.i32_array(blob, cursor, #referent_list)
 		for i, referent in referent_list do
 			local inst = referent_to_instance[referent]
-			inst.Properties[prop_name] = RobloxType.variant("Int32", values[i])
+			inst.Properties[prop_name] = RobloxType.int32(values[i])
 		end
 	elseif type_id == 0x04 then
 		local values: { number }
 		cursor, values = reader.f32_array(blob, cursor, #referent_list)
 		for i, referent in referent_list do
 			local inst = referent_to_instance[referent]
-			inst.Properties[prop_name] = RobloxType.variant("Float32", values[i])
+			inst.Properties[prop_name] = RobloxType.float32(values[i])
 		end
 	elseif type_id == 0x05 then
 		for i, referent in referent_list do
 			local read_value = buffer.readf64(blob, cursor)
 			cursor += 1
 			local inst = referent_to_instance[referent]
-			inst.Properties[prop_name] = RobloxType.variant("Float64", read_value)
+			inst.Properties[prop_name] = RobloxType.float64(read_value)
 		end
+	elseif type_id == 0x06 then
+		print("properties of type UDim are not yet implemented")
+	elseif type_id == 0x07 then
+		print("properties of type UDim2 are not yet implemented")
+	elseif type_id == 0x08 then
+		print("properties of type Ray are not yet implemented")
+	elseif type_id == 0x09 then
+		print("properties of type Faces are not yet implemented")
+	elseif type_id == 0x0a then
+		print("properties of type Axes are not yet implemented")
+	elseif type_id == 0x0b then
+		print("properties of type BrickColor are not yet implemented")
+	elseif type_id == 0x0c then
+		print("properties of type Color3 are not yet implemented")
+	elseif type_id == 0x0d then
+		print("properties of type Vector2 are not yet implemented")
+	elseif type_id == 0x0e then
+		local x: { number }, y: { number }, z: { number }
+		cursor, x = reader.f32_array(blob, cursor, #referent_list)
+		cursor, y = reader.f32_array(blob, cursor, #referent_list)
+		cursor, z = reader.f32_array(blob, cursor, #referent_list)
+		for i, referent in referent_list do
+			local inst = referent_to_instance[referent]
+			inst.Properties[prop_name] = RobloxType.vector3(vector.create(x[i], y[i], z[i]))
+		end
+	elseif type_id == 0x0f then
+		print("properties of type ??? are not yet implemented")
+	elseif type_id == 0x10 then
+		print("properties of type CFrame are not yet implemented")
+	elseif type_id == 0x11 then
+		print("properties of type ??? are not yet implemented")
+	elseif type_id == 0x12 then
+		print("properties of type Enum are not yet implemented")
+	elseif type_id == 0x13 then
+		print("properties of type Referent are not yet implemented")
+	elseif type_id == 0x14 then
+		print("properties of type Vector3int16 are not yet implemented")
+	elseif type_id == 0x15 then
+		print("properties of type NumberSequence are not yet implemented")
+	elseif type_id == 0x16 then
+		print("properties of type ColorSequence are not yet implemented")
+	elseif type_id == 0x17 then
+		print("properties of type NumberRange are not yet implemented")
+	elseif type_id == 0x18 then
+		print("properties of type Rect are not yet implemented")
+	elseif type_id == 0x19 then
+		print("properties of type PhysicalProperties are not yet implemented")
+	elseif type_id == 0x1a then
+		print("properties of type Color3uint8 are not yet implemented")
+	elseif type_id == 0x1b then
+		print("properties of type Int64 are not yet implemented")
+	elseif type_id == 0x1c then
+		print("properties of type SharedString are not yet implemented")
+	elseif type_id == 0x1d then
+		print("properties of type Bytecode are not yet implemented")
+	elseif type_id == 0x1e then
+		print("properties of type OptionalCFrame are not yet implemented")
+	elseif type_id == 0x1f then
+		print("properties of type UniqueId are not yet implemented")
+	elseif type_id == 0x20 then
+		print("properties of type Font are not yet implemented")
+	elseif type_id == 0x21 then
+		print("properties of type SecurityCapabilities are not yet implemented")
+	elseif type_id == 0x22 then
+		print("properties of type Content are not yet implemented")
 	end
 end
 
