@@ -1,11 +1,11 @@
 local referent = require("./referent")
-local RobloxType = require("./RobloxType")
+local RobloxType = require("./roblox-type")
 
 local Instance = {}
 
 export type Instance = {
 	read ClassName: string,
-	read Properties: { [string]: RobloxType.RobloxType },
+	read Properties: { [string]: RobloxType.RobloxValue },
 	read Children: { Instance },
 	read Id: referent.Referent,
 }

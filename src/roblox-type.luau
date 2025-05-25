@@ -1,4 +1,4 @@
-export type RobloxTypes =
+export type RobloxType =
 	| "String"
 	| "Bool"
 	| "Int32"
@@ -34,21 +34,21 @@ export type RobloxTypes =
 	| "SecurityCapabilities"
 	| "Content"
 
-export type RobloxType = {
-	ty: RobloxTypes,
+export type RobloxValue = {
+	ty: RobloxType,
 	data: unknown,
 }
 
 local RobloxType = {}
 
-function RobloxType.string(value: string): RobloxType
+function RobloxType.string(value: string): RobloxValue
 	return {
 		ty = "String",
 		value = value,
 	}
 end
 
-function RobloxType.bool(value: boolean): RobloxType
+function RobloxType.bool(value: boolean): RobloxValue
 	return {
 		ty = "Bool",
 		value = value,
@@ -56,28 +56,28 @@ function RobloxType.bool(value: boolean): RobloxType
 end
 
 -- TODO: Do we want to enforce the invariants of number types?
-function RobloxType.int32(value: number): RobloxType
+function RobloxType.int32(value: number): RobloxValue
 	return {
 		ty = "Int32",
 		value = value,
 	}
 end
 
-function RobloxType.float32(value: number): RobloxType
+function RobloxType.float32(value: number): RobloxValue
 	return {
 		ty = "Float32",
 		value = value,
 	}
 end
 
-function RobloxType.float64(value: number): RobloxType
+function RobloxType.float64(value: number): RobloxValue
 	return {
 		ty = "Float64",
 		value = value,
 	}
 end
 
-function RobloxType.vector3(value: vector): RobloxType
+function RobloxType.vector3(value: vector): RobloxValue
 	return {
 		ty = "Vector3",
 		value = value,
