@@ -128,35 +128,35 @@ local function parse_PROP(
 		for i, referent in referent_list do
 			cursor, read_value = reader.string(blob, cursor)
 			local inst = referent_to_instance[referent]
-			inst.Properties[prop_name] = RobloxType.string(read_value)
+			inst.Properties[prop_name] = RobloxType.new.string(read_value)
 		end
 	elseif type_id == 0x02 then
 		for i, referent in referent_list do
 			local read_value = buffer.readu8(blob, cursor)
 			cursor += 1
 			local inst = referent_to_instance[referent]
-			inst.Properties[prop_name] = RobloxType.bool(read_value ~= 0x00)
+			inst.Properties[prop_name] = RobloxType.new.bool(read_value ~= 0x00)
 		end
 	elseif type_id == 0x03 then
 		local values: { number }
 		cursor, values = reader.i32_array(blob, cursor, #referent_list)
 		for i, referent in referent_list do
 			local inst = referent_to_instance[referent]
-			inst.Properties[prop_name] = RobloxType.int32(values[i])
+			inst.Properties[prop_name] = RobloxType.new.int32(values[i])
 		end
 	elseif type_id == 0x04 then
 		local values: { number }
 		cursor, values = reader.f32_array(blob, cursor, #referent_list)
 		for i, referent in referent_list do
 			local inst = referent_to_instance[referent]
-			inst.Properties[prop_name] = RobloxType.float32(values[i])
+			inst.Properties[prop_name] = RobloxType.new.float32(values[i])
 		end
 	elseif type_id == 0x05 then
 		for i, referent in referent_list do
 			local read_value = buffer.readf64(blob, cursor)
 			cursor += 1
 			local inst = referent_to_instance[referent]
-			inst.Properties[prop_name] = RobloxType.float64(read_value)
+			inst.Properties[prop_name] = RobloxType.new.float64(read_value)
 		end
 	elseif type_id == 0x06 then
 		print("properties of type UDim are not yet implemented")
@@ -181,7 +181,7 @@ local function parse_PROP(
 		cursor, z = reader.f32_array(blob, cursor, #referent_list)
 		for i, referent in referent_list do
 			local inst = referent_to_instance[referent]
-			inst.Properties[prop_name] = RobloxType.vector3(vector.create(x[i], y[i], z[i]))
+			inst.Properties[prop_name] = RobloxType.new.vector3(vector.create(x[i], y[i], z[i]))
 		end
 	elseif type_id == 0x0f then
 		print("properties of type ??? are not yet implemented")
