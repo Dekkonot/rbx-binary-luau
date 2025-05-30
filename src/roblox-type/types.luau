@@ -36,7 +36,7 @@ export type RobloxType =
 
 export type RobloxValue = {
 	ty: RobloxType,
-	data: unknown,
+	value: unknown,
 }
 
 local types = {}
