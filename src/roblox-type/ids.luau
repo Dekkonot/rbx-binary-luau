@@ -1,6 +1,6 @@
 local types = require("./types")
 
-local from_types: { [types.RobloxType]: number } = {
+local from_type: { [types.RobloxType]: number } = {
 	["String"] = 0x01,
 	["Bool"] = 0x02,
 	["Int32"] = 0x03,
@@ -41,6 +41,7 @@ local from_types: { [types.RobloxType]: number } = {
 -- We cannot at the moment because it resolves into an unusable type.
 -- See this Luau bug: https://github.com/luau-lang/luau/issues/1851
 
-return {
-	from_type = from_types,
-}
+local ids = {}
+ids.from_type = from_type
+
+return ids
