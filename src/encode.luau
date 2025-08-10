@@ -359,7 +359,7 @@ local function encode(dom: dom.DOM, compression_type: compress.CompressionType?)
 		compressed_PROP_len += len
 	end
 
-	local chunk_count = 4 + #INST_chunks + #PROP_chunks
+	local chunk_count = 3 + #INST_chunks + #PROP_chunks
 	local length = MAGIC_NUMBER_LEN
 		+ 18
 		+ compressed_META_len
@@ -372,7 +372,7 @@ local function encode(dom: dom.DOM, compression_type: compress.CompressionType?)
 	if next(sstr_list) ~= nil then
 		SSTR_chunk = encode_SSTR(sstr_list)
 		compressed_SSTR, compressed_SSTR_len = compressor(SSTR_chunk)
-		length += compressed_SSTR_len
+		length += compressed_SSTR_len + 16
 	end
 
 	local blob = buffer.create(length)
