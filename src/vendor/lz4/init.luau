@@ -13,9 +13,8 @@ local MISS_COUNTER_BITS = 6 -- Lower values = the step is incremented sooner
 local HASH_SHIFT = 32 - 16  -- 32 - # of bits in the hash
 local MAX_DISTANCE = 0xFFFF -- Maximum offset that can fit into two bytes
 
-local SMALL_DATA_GROWTH = 2
-local SMALL_DATA_THRESHOLD = 50
-local MAX_COMPRESSION_GROWTH = 1 + 1/250
+local COMPRESSION_GROWTH = 1 + 1/255 -- Asymptotic growth ratio of incompressible data
+local BUFFER_SIZE_PADDING = 16
 local DEFAULT_BUFFER_SIZE = 512 * 1024^1 -- 512 KiB
 local DEFAULT_MAX_BUFFER_SIZE = 2^31 -- BIG
 
@@ -25,7 +24,7 @@ local MATCH_LEN_BITS = 4
 local MATCH_LEN_MASK = lshift(1, MATCH_LEN_BITS) - 1
 
 
-local function checkType(value, typ, argNum, funcName)
+local function checkType(value: unknown, typ: string, argNum: number, funcName: string)
 	local actual = typeof(value)
 	assert(actual == typ, `bad argument #{argNum} to '{funcName}' ({typ} expected, got {actual})`)
 end
@@ -39,8 +38,9 @@ local function checkData(data: buffer, dataStart: number, dataLen: number, funcN
 	assert(dataStart + dataLen <= buffer.len(data), "data range not in buffer")
 end
 
-local function checkAcceleration(acceleration: number?, argNum: number, funcName: string)
+local function checkAcceleration(acceleration: number?, argNum: number, funcName: string): number
 	acceleration = acceleration or 1
+	assert(acceleration, "luau analysis hint")
 	checkType(acceleration, "number", argNum, funcName)
 	assert(acceleration >= 1 and acceleration % 1 == 0, "acceleration must be an integer >= 1")
 	return acceleration
@@ -61,14 +61,12 @@ end
 	@return buffer A buffer containing the compressed data at offset 0.
 	@return number The length of the compressed data.
 ]]
-local function compressBuffer(data: buffer, dataStart: number, dataLen: number, acceleration: number?)
+local function compressBuffer(data: buffer, dataStart: number, dataLen: number, acceleration: number?): (buffer, number)
 	checkData(data, dataStart, dataLen, "compressBuffer")
 	acceleration = checkAcceleration(acceleration, 4, "compressBuffer")
 
 	local hashTable = {}
-	
-	local realGrowth = if dataLen <= SMALL_DATA_THRESHOLD then SMALL_DATA_GROWTH else MAX_COMPRESSION_GROWTH
-	local out, outNext = buffer.create(math.ceil(dataLen * realGrowth)), 0
+	local out, outNext = buffer.create(math.ceil(dataLen * COMPRESSION_GROWTH) + BUFFER_SIZE_PADDING), 0
 
 	local pos = dataStart -- 0-indexed
 	local nextUnencodedPos = pos -- Sometimes called the "anchor" in other implementations
@@ -103,7 +101,7 @@ local function compressBuffer(data: buffer, dataStart: number, dataLen: number, 
 			local matchOffset = pos - matchPos
 
 			-- Try to extend backwards
-			while pos ~= 0 and matchPos ~= 0 and literalCount > 0 and buffer.readu8(data, pos - 1) == buffer.readu8(data, matchPos - 1) do
+			while literalCount > 0 and matchPos > 0 and buffer.readu8(data, pos - 1) == buffer.readu8(data, matchPos - 1) do
 				literalCount = literalCount - 1
 				pos = pos - 1
 				matchPos = matchPos - 1
@@ -201,7 +199,7 @@ end
 	  the cost of compression efficiency.
 	@return string The compressed data as a string.
 ]]
-local function compressString(str, acceleration)
+local function compressString(str: string, acceleration: number?): string
 	checkType(str, "string", 1, "compressString")
 	acceleration = checkAcceleration(acceleration, 2, "compressString")
 
@@ -209,10 +207,10 @@ local function compressString(str, acceleration)
 	return buffer.readstring(buf, 0, len)
 end
 
-local function expandBuffer(out: buffer, maxLen: number)
+local function expandBuffer(out: buffer, maxLen: number): (buffer, number)
 	local curLen = buffer.len(out)
 	if curLen >= maxLen then
-		return nil, "maximum decompressed length was exceeded"
+		return out, -1
 	end
 	local newLen = math.min(maxLen, curLen * 2)
 	local newOut = buffer.create(newLen)
@@ -243,10 +241,10 @@ local function decompressBuffer(data: buffer, dataStart: number, dataLen: number
 	checkData(data, dataStart, dataLen, "decompressBuffer")
 	decompressedLen = decompressedLen or -DEFAULT_MAX_BUFFER_SIZE
 	checkType(decompressedLen, "number", 4, "decompressBuffer")
-	
-	local maxLen = math.abs(decompressedLen)
-	local outLen: number = (decompressedLen >= 0) and decompressedLen or DEFAULT_BUFFER_SIZE
-	local out: buffer, outNext = buffer.create(outLen), 0
+
+	local maxLen = math.abs(decompressedLen :: number)
+	local outLen = (decompressedLen >= 0) and decompressedLen or DEFAULT_BUFFER_SIZE
+	local out, outNext = buffer.create(outLen), 0
 
 	local pos = 0 -- 0-indexed
 	while pos < dataLen do
@@ -266,7 +264,8 @@ local function decompressBuffer(data: buffer, dataStart: number, dataLen: number
 		end
 
 		while outNext + literalCount > outLen do
-			out, outLen = assert(expandBuffer(out, maxLen))
+			out, outLen = expandBuffer(out, maxLen)
+			assert(outLen ~= -1, "maximum decompressed length was exceeded")
 		end
 
 		-- Copy literals (if any)
@@ -294,8 +293,9 @@ local function decompressBuffer(data: buffer, dataStart: number, dataLen: number
 
 		matchLength = matchLength + MIN_MATCH
 
-		while outNext + matchLength > (outLen :: number) do
-			out, outLen = assert(expandBuffer(out, maxLen))
+		while outNext + matchLength > outLen do
+			out, outLen = expandBuffer(out, maxLen)
+			assert(outLen ~= -1, "maximum decompressed length was exceeded")
 		end
 
 		-- Copy match
@@ -328,7 +328,7 @@ end
 	  output buffer will be dynamically resized with no upper bound.
 	@return string The decompressed string.
 ]]
-local function decompressString(str, decompressedLen)
+local function decompressString(str: string, decompressedLen: number?): string
 	checkType(str, "string", 1, "decompressString")
 	decompressedLen = decompressedLen or -DEFAULT_MAX_BUFFER_SIZE
 	checkType(decompressedLen, "number", 4, "decompressBuffer")
