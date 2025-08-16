@@ -23,7 +23,7 @@ for _, test in test_list do
 	local dom = rbx_binary.decode(buffer.fromstring(content))
 	-- TODO: snapshot decoding :3
 
-	local encoded = rbx_binary.encode(dom, "None")
+	local encoded = rbx_binary.encode(dom, "Lz4")
 	fs.writeFile(string.format(OUTPUT_BASE, test), encoded)
 	local result = process.exec("cargo", {
 		"run",
