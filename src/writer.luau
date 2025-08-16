@@ -5,7 +5,7 @@ local temporary_storage = buffer.create(4)
 @native
 local function transform_i32(n: number): number
 	-- (x << 1) ^ (x >> 31)
-	return bit32.bxor(bit32.lshift(n, 1), bit32.rshift(n, 31))
+	return bit32.bxor(bit32.lshift(n, 1), bit32.arshift(n, 31))
 end
 
 local Writer = {}
