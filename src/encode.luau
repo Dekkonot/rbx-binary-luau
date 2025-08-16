@@ -417,7 +417,7 @@ local function encode(dom: dom.DOM, compression_type: compress.CompressionType?)
 		cursor = writer.chunk(blob, cursor, "PROP", chunk, buffer.len(PROP_chunks[i]), compression_type)
 	end
 	cursor = writer.chunk(blob, cursor, "PRNT", compressed_PRNT, buffer.len(PRNT_chunk), compression_type)
-	cursor = writer.chunk(blob, cursor, "END\0", END_chunk, END_CONTENT_LEN, compression_type)
+	cursor = writer.chunk(blob, cursor, "END\0", END_chunk, END_CONTENT_LEN, "None")
 
 	return blob
 end
