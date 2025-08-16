@@ -273,9 +273,6 @@ local function encode_SSTR(sstr_list: { string }): buffer
 end
 
 local function encode_PRNT(dom: dom.DOM, collected_classes: { CollectedClass }): buffer
-	-- TODO: We probably want to collect these
-	-- the same way Roblox and rbx-binary does
-	-- but that means redoing how we do INST chunks
 	local inst_count = 0
 	for _ in dom.instances do
 		inst_count += 1
@@ -294,8 +291,12 @@ local function encode_PRNT(dom: dom.DOM, collected_classes: { CollectedClass }):
 	end
 	local children = table.create(inst_count) :: { number }
 	local parents = table.create(inst_count) :: { number }
-	for i = #descendants, 1, -1 do
-		local referent = descendants[i]
+	-- I am skeptical that this is actually the correct way to handle
+	-- these links, but tests indicate that our output is identical to
+	-- rbx_binary so it's... probably fine? If it isn't, we need to redo
+	-- handling of INST and PROP chunks so I'm inclined to leave well enough
+	-- alone for now.
+	for _, referent in descendants do
 		local parent = prnt_links[referent]
 		table.insert(children, referent_map(referent))
 		table.insert(parents, if parent then referent_map(parent) else -1)
