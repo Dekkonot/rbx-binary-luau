@@ -44,15 +44,20 @@ local function inst_sort(a: CollectedClass, b: CollectedClass): boolean
 end
 
 local referent_cache = {}
-local last_referent = 0
+local last_cached_referent = 0
 local function referent_map(referent: referent.Referent): number
 	local mapped_value = referent_cache[referent.id]
 	if not mapped_value then
-		mapped_value = last_referent
-		referent_cache[referent.id] = last_referent
-		last_referent += 1
+		mapped_value = last_cached_referent
+		referent_cache[referent.id] = last_cached_referent
+		last_cached_referent += 1
 	end
 	return mapped_value
+end
+
+local function reset_referent_map()
+	table.clear(referent_cache)
+	last_cached_referent = 0
 end
 
 local function encode_META(metadata: { [string]: string }): buffer
@@ -313,6 +318,7 @@ end
 
 local function encode(dom: dom.DOM, compression_type: compress.CompressionType?): buffer
 	compression_type = compression_type or "Lz4" :: "Lz4"
+	reset_referent_map()
 
 	-- INST chunk counters
 	local collected_classes: { [string]: CollectedClass } = {}
