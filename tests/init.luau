@@ -8,6 +8,7 @@ local OUTPUT_BASE = "tests/output/%s.rbxm"
 
 local fs = require("@lune/fs")
 local process = require("@lune/process")
+local stdio = require("@lune/stdio")
 
 local rbx_binary = require("../src")
 
@@ -40,10 +41,10 @@ local failed = false
 for _, test in test_list do
 	local failure_message = failures[test]
 	if failure_message then
-		print(`[❌] {test} failed!`)
+		stdio.write(`[{stdio.color("red")}-{stdio.color("reset")}] {test} failed\n`)
 		-- print(failure_message)
 	else
-		print(`[✔] {test} passed`)
+		stdio.write(`[{stdio.color("green")}+{stdio.color("reset")}] {test} passed\n`)
 	end
 end
 
