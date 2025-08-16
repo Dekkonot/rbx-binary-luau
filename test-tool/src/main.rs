@@ -8,6 +8,8 @@ struct Cli {
 }
 
 fn main() {
+    env_logger::try_init().unwrap();
+
     let cli = Cli::parse();
 
     let gold_path = PathBuf::from(format!(
