@@ -280,19 +280,32 @@ local function encode_PRNT(dom: dom.DOM, collected_classes: { CollectedClass }):
 	for _ in dom.instances do
 		inst_count += 1
 	end
-	local prnt_list = {}
+	local prnt_links = {}
+	local descendants = {} :: { referent.Referent }
 	local to_visit = table.clone(dom.roots)
 	while next(to_visit) ~= nil do
 		local referent = table.remove(to_visit, 1) :: referent.Referent
-		local inst = dom.instances[referent]
-		for _, v in inst.Children do
-			prnt_list[v.Id] = referent
-			table.insert(to_visit, v.Id)
+		local instance = dom.instances[referent]
+		table.insert(descendants, referent)
+		for _, child in instance.Children do
+			prnt_links[child.Id] = referent
+			table.insert(to_visit, child.Id)
 		end
 	end
+	local children = table.create(inst_count) :: { number }
+	local parents = table.create(inst_count) :: { number }
+	for i = #descendants, 1, -1 do
+		local referent = descendants[i]
+		local parent = prnt_links[referent]
+		table.insert(children, referent_map(referent))
+		table.insert(parents, if parent then referent_map(parent) else -1)
+	end
+
 	local blob = buffer.create(5 + inst_count * 8)
 	buffer.writeu8(blob, 0, PRNT_VERSION)
 	buffer.writeu32(blob, 1, inst_count)
+	local cursor = writer.referent_array(blob, 5, children)
+	writer.referent_array(blob, cursor, parents)
 
 	return blob
 end
