@@ -44,7 +44,7 @@ local function inst_sort(a: CollectedClass, b: CollectedClass): boolean
 end
 
 local referent_cache = {}
-local last_referent = 1
+local last_referent = 0
 local function referent_map(referent: referent.Referent): number
 	local mapped_value = referent_cache[referent.id]
 	if not mapped_value then
