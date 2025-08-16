@@ -1,3 +1,5 @@
+local compress = require("./compress")
+
 local temporary_storage = buffer.create(4)
 
 @native
@@ -57,15 +59,16 @@ function Writer.referent_array(buf: buffer, cursor: number, referents: { number 
 	return cursor
 end
 
-function Writer.write_chunk(
+function Writer.chunk(
 	buf: buffer,
 	cursor: number,
 	chunk_name: string,
 	chunk_data: buffer,
-	decompressed_len: number
+	decompressed_len: number,
+	compression_type: compress.CompressionType
 ): number
 	buffer.writestring(buf, cursor, chunk_name, 4)
-	if decompressed_len == 0 then -- This is not compressed
+	if compression_type == "None" then -- This is not compressed
 		buffer.writeu32(buf, cursor + 4, 0)
 	else
 		buffer.writeu32(buf, cursor + 4, buffer.len(chunk_data))

@@ -298,6 +298,8 @@ local function encode_PRNT(dom: dom.DOM, collected_classes: { CollectedClass }):
 end
 
 local function encode(dom: dom.DOM, compression_type: compress.CompressionType?): buffer
+	compression_type = compression_type or "Lz4" :: "Lz4"
+
 	-- INST chunk counters
 	local collected_classes: { [string]: CollectedClass } = {}
 	local collected_class_count = 0
@@ -381,20 +383,21 @@ local function encode(dom: dom.DOM, compression_type: compress.CompressionType?)
 	buffer.writei32(blob, MAGIC_NUMBER_LEN + 2, #INST_chunks)
 	buffer.writei32(blob, MAGIC_NUMBER_LEN + 6, inst_count)
 
-	local cursor = writer.write_chunk(blob, MAGIC_NUMBER_LEN + 18, "META", compressed_META, buffer.len(META_chunk))
+	local cursor =
+		writer.chunk(blob, MAGIC_NUMBER_LEN + 18, "META", compressed_META, buffer.len(META_chunk), compression_type)
 	if next(sstr_list) ~= nil then
 		assert(SSTR_chunk, "SSTR chunk was not serialized")
 		assert(compressed_SSTR, "SSTR chunk was not compressed")
-		cursor = writer.write_chunk(blob, cursor, "SSTR", compressed_SSTR, buffer.len(SSTR_chunk))
+		cursor = writer.chunk(blob, cursor, "SSTR", compressed_SSTR, buffer.len(SSTR_chunk), compression_type)
 	end
 	for i, chunk in compressed_INST_chunks do
-		cursor = writer.write_chunk(blob, cursor, "INST", chunk, buffer.len(INST_chunks[i]))
+		cursor = writer.chunk(blob, cursor, "INST", chunk, buffer.len(INST_chunks[i]), compression_type)
 	end
 	for i, chunk in compressed_PROP_chunks do
-		cursor = writer.write_chunk(blob, cursor, "PROP", chunk, buffer.len(PROP_chunks[i]))
+		cursor = writer.chunk(blob, cursor, "PROP", chunk, buffer.len(PROP_chunks[i]), compression_type)
 	end
-	cursor = writer.write_chunk(blob, cursor, "PRNT", compressed_PRNT, buffer.len(PRNT_chunk))
-	cursor = writer.write_chunk(blob, cursor, "END\0", END_chunk, 0)
+	cursor = writer.chunk(blob, cursor, "PRNT", compressed_PRNT, buffer.len(PRNT_chunk), compression_type)
+	cursor = writer.chunk(blob, cursor, "END\0", END_chunk, END_CONTENT_LEN, compression_type)
 
 	return blob
 end
