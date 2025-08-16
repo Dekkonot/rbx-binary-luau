@@ -1,0 +1,11 @@
+[package]
+name = "test-tool"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+clap = { version = "4.5.43", features = ["derive"] }
+fs-err = "3.1.1"
+insta = { version = "1.43.1", features = ["yaml"] }
+rbx_binary = { version = "1.0.0", features = ["serde", "unstable_text_format"] }
