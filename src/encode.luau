@@ -350,7 +350,7 @@ local function encode(dom: dom.DOM, compression_type: compress.CompressionType?)
 		table.insert(sorted_data, v)
 	end
 	table.sort(sorted_data, inst_sort)
-	print("Collected class data:", sorted_data)
+	-- print("Collected class data:", sorted_data)
 
 	local META_chunk = encode_META(metadata)
 	local INST_chunks = encode_INSTs(sorted_data)

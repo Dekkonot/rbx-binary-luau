@@ -30,7 +30,7 @@ local function dump_hex(blob: buffer, starting_at: number?)
 end
 
 local function parse_META(blob: buffer): { [string]: string }
-	print("Parsing META")
+	-- print("Parsing META")
 	local count = buffer.readu32(blob, 0)
 	local entries = {}
 	local cursor = 4
@@ -38,7 +38,7 @@ local function parse_META(blob: buffer): { [string]: string }
 	for _ = 1, count do
 		cursor, key = reader.string(blob, cursor)
 		cursor, value = reader.string(blob, cursor)
-		print(`  {key} = {value}`)
+		-- print(`  {key} = {value}`)
 		entries[key] = value
 	end
 
@@ -46,7 +46,7 @@ local function parse_META(blob: buffer): { [string]: string }
 end
 
 local function parse_SSTR(blob: buffer): { string }
-	print("Parsing SSTR")
+	-- print("Parsing SSTR")
 	local version = buffer.readu32(blob, 0)
 	if version ~= SSTR_VERSION then
 		error(
@@ -63,7 +63,7 @@ local function parse_SSTR(blob: buffer): { string }
 		local _hash = buffer.readstring(blob, cursor, 16)
 		-- And this is where we'd validate the hash if we cared to.
 		cursor, sstr = reader.string(blob, cursor + 16)
-		print(`  sstr #{i} = {#sstr} bytes`)
+		-- print(`  sstr #{i} = {#sstr} bytes`)
 		strings[i] = sstr
 	end
 
@@ -75,11 +75,11 @@ local function parse_INST(
 	class_id_lists: { [number]: { number } },
 	referent_to_instance: { [number]: instance.Instance }
 )
-	print("Parsing INST")
+	-- print("Parsing INST")
 	local class_id = buffer.readu32(blob, 0)
 	local cursor, class_name = reader.string(blob, 4)
-	print(`  class_id: {class_id}`)
-	print(`  class_name: {class_name}`)
+	-- print(`  class_id: {class_id}`)
+	-- print(`  class_name: {class_name}`)
 
 	local chunk_format = buffer.readu8(blob, cursor)
 	if chunk_format ~= 0 and chunk_format ~= 1 then
@@ -87,7 +87,7 @@ local function parse_INST(
 	end
 	local instance_count = buffer.readu32(blob, cursor + 1)
 	local referents
-	print(`  count: {instance_count}`)
+	-- print(`  count: {instance_count}`)
 	cursor, referents = reader.referent_array(blob, cursor + 5, instance_count)
 	-- In theory if the chunk format is `1` we need to check for
 	-- 'service markers' but in practice I don't know if we have to
@@ -96,9 +96,9 @@ local function parse_INST(
 
 	class_id_lists[class_id] = referents
 
-	print(`  referents:`)
+	-- print(`  referents:`)
 	for _, referent in referents do
-		print(`    - {referent}`)
+		-- print(`    - {referent}`)
 		local instance = instance.new(class_name)
 		referent_to_instance[referent] = instance
 	end
@@ -111,14 +111,14 @@ local function parse_PROP(
 	referent_to_instance: { [number]: instance.Instance },
 	shared_strings: { [number]: string }
 )
-	print("Parsing PROP")
+	-- print("Parsing PROP")
 	local class_id = buffer.readu32(blob, 0)
 	local cursor, prop_name = reader.string(blob, 4)
-	print(`  class_id: {class_id}`)
-	print(`  prop_name: {prop_name}`)
+	-- print(`  class_id: {class_id}`)
+	-- print(`  prop_name: {prop_name}`)
 	local type_id = buffer.readu8(blob, cursor)
 	cursor += 1
-	print(`  type_id: {string.format("%02x", type_id)}`)
+	-- print(`  type_id: {string.format("%02x", type_id)}`)
 	local referent_list = class_id_lists[class_id]
 	if not referent_list then
 		error(`cannot read binary file: PROP chunk references unknown INST chunk {class_id}`, 2)
@@ -231,7 +231,7 @@ local function parse_PRNT(
 	referent_to_instance: { [number]: instance.Instance },
 	roots: { referent.Referent }
 )
-	print("Parsing PRNT")
+	-- print("Parsing PRNT")
 	local version = buffer.readu8(blob, 0)
 	if version ~= PRNT_VERSION then
 		error(
@@ -240,12 +240,12 @@ local function parse_PRNT(
 		)
 	end
 	local inst_count = buffer.readu32(blob, 1)
-	print(`  inst_count: {inst_count}`)
+	-- print(`  inst_count: {inst_count}`)
 	local cursor
 	local children, parents
 	cursor, children = reader.referent_array(blob, 5, inst_count)
 	cursor, parents = reader.referent_array(blob, cursor, inst_count)
-	print("  relationships:")
+	-- print("  relationships:")
 	for i, child in children do
 		local parent = parents[i]
 		local child_instance = referent_to_instance[child]
@@ -254,12 +254,12 @@ local function parse_PRNT(
 		else
 			table.insert(referent_to_instance[parent].Children, child_instance)
 		end
-		print(`    - {child} -> {parent}`)
+		-- print(`    - {child} -> {parent}`)
 	end
 end
 
 local function parse_END(blob: buffer)
-	print("Parsing END")
+	-- print("Parsing END")
 	local len = buffer.len(blob)
 	if len ~= END_CONTENT_LEN then
 		error("cannot read binary file: the END chunk is the incorrect length", 2)
