@@ -1,6 +1,7 @@
 local test_list = {
-	"three-vector3values",
-	"default-inserted-folder",
+	-- "three-vector3values",
+	"three-unique-frames",
+	-- "default-inserted-folder",
 }
 
 local INPUT_BASE = "rbx-test-files/models/%s/binary.rbxm"
@@ -10,7 +11,7 @@ local fs = require("@lune/fs")
 local process = require("@lune/process")
 local stdio = require("@lune/stdio")
 
-local rbx_binary = require("../src")
+local rbx_binary = require("./src")
 
 process.exec("cargo", {
 	"build",
