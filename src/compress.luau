@@ -10,7 +10,7 @@ compress.ZSTD_MAGIC_NUMBER = ZSTD_MAGIC_NUMBER
 
 function compress.lz4_encode(input: buffer): (buffer, number)
 	local lz4 = require("./vendor/lz4")
-	local compressed = lz4.compress(buffer.tostring(input), 6)
+	local compressed = lz4.compress(buffer.tostring(input), 12)
 	return buffer.fromstring(compressed), #compressed
 end
 
