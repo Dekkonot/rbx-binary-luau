@@ -1,5 +1,6 @@
 local types = require("@self/types")
 local new = require("@self/new")
+local brickcolor = require("@self/brickcolor")
 local ids = require("@self/ids")
 local size = require("@self/size")
 
@@ -11,5 +12,6 @@ local RobloxType = {}
 RobloxType.new = new
 RobloxType.ids = ids
 RobloxType.size = size
+RobloxType.brickcolor = brickcolor
 
 return RobloxType
