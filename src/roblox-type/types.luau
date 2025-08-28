@@ -1,4 +1,5 @@
 local referent = require("../referent")
+local font = require("./font")
 
 export type RobloxType =
 	| "String"
@@ -104,7 +105,7 @@ export type Rect = {
 
 export type PhysicalProperties = never
 
-export type Color3uint8 = { R: number, G: number, B: number }
+export type Color3uint8 = vector
 
 export type Int64 = never
 
@@ -118,8 +119,8 @@ export type UniqueId = buffer
 
 export type Font = {
 	Family: string,
-	Weight: number,
-	Style: number,
+	Weight: font.FontWeight,
+	Style: font.FontStyle,
 	CachedFaceId: string?,
 }
 

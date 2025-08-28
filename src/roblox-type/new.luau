@@ -1,6 +1,7 @@
 local types = require("./types")
 local brickcolor = require("./brickcolor")
 local referent = require("../referent")
+local font = require("./font")
 
 local new = {}
 
@@ -190,10 +191,10 @@ function new.PhysicalProperties(): types.RobloxValue
 	error("PhysicalProperties values are unimplemented")
 end
 
-function new.Color3uint8(r: number, b: number, g: number): types.RobloxValue
+function new.Color3uint8(value: vector): types.RobloxValue
 	return {
 		ty = "Color3uint8",
-		value = { R = r, G = g, B = b },
+		value = value,
 	}
 end
 
@@ -226,7 +227,12 @@ function new.UniqueId(value: buffer): types.RobloxValue
 	}
 end
 
-function new.Font(family: string, weight: number, style: number, cached_face_id: string?): types.RobloxValue
+function new.Font(
+	family: string,
+	weight: font.FontWeight,
+	style: font.FontStyle,
+	cached_face_id: string?
+): types.RobloxValue
 	return {
 		ty = "Font",
 		value = {
